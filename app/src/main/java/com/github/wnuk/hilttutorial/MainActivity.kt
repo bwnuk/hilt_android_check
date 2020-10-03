@@ -8,14 +8,35 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    //field injection
     @Inject
-    lateinit var fieldClass: FieldClass
+    lateinit var someClass: SomeClass
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        println(fieldClass.doAThing())
+        println(someClass.doAThing())
     }
+}
+
+class SomeClass
+@Inject
+constructor(
+    private val someInterfaceImpl: SomeInterface
+){
+    fun doAThing(): String{
+        return "Look I got: ${someInterfaceImpl.getAThing()}"
+    }
+}
+
+class SomeInterfaceImpl
+@Inject
+constructor(): SomeInterface {
+    override fun getAThing() : String{
+        return "A Thing"
+    }
+}
+
+interface SomeInterface{
+    fun getAThing(): String
 }
