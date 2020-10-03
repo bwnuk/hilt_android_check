@@ -9,6 +9,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
 import javax.inject.Inject
+import javax.inject.Qualifier
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -28,20 +29,30 @@ class MainActivity : AppCompatActivity() {
 class SomeClass
 @Inject
 constructor(
-    private val someInterfaceImpl: SomeInterface
+    @Impl1 private val someInterfaceImpl: SomeInterface,
+    @Impl2 private val someInterfaceImplSecond: SomeInterface
 ) {
     fun doAThing(): String {
         return "Look I got: ${someInterfaceImpl.getAThing()}"
+    }
+    fun doAThingSecond(): String {
+        return "Look I got: ${someInterfaceImplSecond.getAThing()}"
     }
 }
 
 class SomeInterfaceImpl
 @Inject
-constructor(
-    private val someDependency: String
-) : SomeInterface {
+constructor() : SomeInterface {
     override fun getAThing(): String {
-        return "A Thing ${someDependency}"
+        return "A Thing 1"
+    }
+}
+
+class SomeInterfaceImplSecond
+@Inject
+constructor() : SomeInterface {
+    override fun getAThing(): String {
+        return "A Thing 2"
     }
 }
 
@@ -52,15 +63,26 @@ interface SomeInterface {
 @InstallIn(ActivityComponent::class)
 @Module
 class MyModule {
+
+    @Impl1
     @ActivityScoped
     @Provides
-    fun providesSomeString(): String{
-        return "SomeString"
+    fun provideSomeInterface(): SomeInterface{
+        return SomeInterfaceImpl()
     }
 
+    @Impl2
     @ActivityScoped
     @Provides
-    fun provideSomeInterface(someString: String): SomeInterface{
-        return SomeInterfaceImpl(someString)
+    fun provideSomeInterfaceSecond(): SomeInterface{
+        return SomeInterfaceImplSecond()
     }
 }
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class Impl1
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class Impl2
