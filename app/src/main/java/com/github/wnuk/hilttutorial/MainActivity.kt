@@ -1,16 +1,14 @@
 package com.github.wnuk.hilttutorial
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.google.gson.Gson
-import dagger.Binds
+import androidx.appcompat.app.AppCompatActivity
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -30,8 +28,7 @@ class MainActivity : AppCompatActivity() {
 class SomeClass
 @Inject
 constructor(
-    private val someInterfaceImpl: SomeInterface,
-    private val gson: Gson
+    private val someInterfaceImpl: SomeInterface
 ) {
     fun doAThing(): String {
         return "Look I got: ${someInterfaceImpl.getAThing()}"
@@ -40,9 +37,11 @@ constructor(
 
 class SomeInterfaceImpl
 @Inject
-constructor() : SomeInterface {
+constructor(
+    private val someDependency: String
+) : SomeInterface {
     override fun getAThing(): String {
-        return "A Thing"
+        return "A Thing ${someDependency}"
     }
 }
 
@@ -50,16 +49,18 @@ interface SomeInterface {
     fun getAThing(): String
 }
 
-@InstallIn(ApplicationComponent::class)
+@InstallIn(ActivityComponent::class)
 @Module
-abstract class MyModule {
-    @Singleton
-    @Binds
-    abstract fun bindSomeDependency(
-        someImpl: SomeInterfaceImpl
-    ): SomeInterface
+class MyModule {
+    @ActivityScoped
+    @Provides
+    fun providesSomeString(): String{
+        return "SomeString"
+    }
 
     @ActivityScoped
-    @Binds
-    abstract fun bindGson(gson: Gson): Gson
+    @Provides
+    fun provideSomeInterface(someString: String): SomeInterface{
+        return SomeInterfaceImpl(someString)
+    }
 }
