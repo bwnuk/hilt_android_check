@@ -17,6 +17,5 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         println(fieldClass.doAThing())
-        println(fieldClass.doOtherThing())
     }
 }
